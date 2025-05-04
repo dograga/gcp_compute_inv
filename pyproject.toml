@@ -9,4 +9,5 @@ dependencies = [
     "google-cloud>=0.34.0",
     "google-cloud-container>=2.56.1",
     "redis>=6.0.0",
+    "structlog>=25.3.0",
 ]
