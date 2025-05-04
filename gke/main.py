@@ -53,7 +53,7 @@ def fetch_gke_clusters() -> List[GKEClusterInfo]:
 def main():
     clusters = fetch_gke_clusters()
     #r = redis.Redis(host='172.22.204.229', port=6379, db=0)
-    r = redis.Redis(host='10.80.54.3', port=6379, db=0)
+    r = redis.Redis(host='10.38.229.3', port=6379, db=0)
     inventory_key = "gke:clusters"
     if not clusters:
         print("No GKE clusters found.")
@@ -62,8 +62,12 @@ def main():
             print(cluster)
             logger.info("Cluster info", cluster=cluster)
             cluster_key = f"gke:cluster:{cluster.name}"
-            r.set(cluster_key, json.dumps(asdict(cluster)))
-            r.sadd(inventory_key, cluster.name)
+            try:
+                r.set(cluster_key, json.dumps(asdict(cluster)))
+                r.sadd(inventory_key, cluster.name)
+                logger.info("Cluster added to Redis", cluster_key=cluster_key)
+            except redis.RedisError as e:
+                logger.error("Redis error", error=str(e))
             # Connect to Redis
 
 
