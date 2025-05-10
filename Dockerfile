@@ -24,7 +24,11 @@ RUN chown -R appuser:appgroup /app
 # Switch to non-root user
 USER appuser
 
-# Set a valid cache directory for uv
+# Create a non-root user with home directory
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup --home /home/appuser appuser
+
+# Set HOME and XDG_CACHE_HOME properly
+ENV HOME=/home/appuser
 ENV XDG_CACHE_HOME=/tmp/uv_cache
 
 # Set entrypoint
