@@ -52,7 +52,7 @@ def fetch_gke_clusters() -> List[GKEClusterInfo]:
 
 def main():
     r = redis.Redis(host='172.22.204.229', port=6379, db=0)
-    #r = redis.Redis(host='10.38.229.3', port=6379, db=0)
+    r = redis.Redis(host='10.38.229.3', port=6379, db=0)
     clusters = fetch_gke_clusters()
     inventory_key = "gke:clusters"
     if not clusters:

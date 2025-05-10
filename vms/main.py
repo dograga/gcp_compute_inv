@@ -6,6 +6,7 @@ import structlog
 from typing import List
 
 r = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+r = redis.Redis(host='10.38.229.3', port=6379, db=0)
 logger = structlog.get_logger()
 
 @dataclass

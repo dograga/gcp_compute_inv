@@ -27,5 +27,5 @@ USER appuser
 # Set a valid cache directory for uv
 ENV XDG_CACHE_HOME=/tmp/uv_cache
 
-# Run the script
-CMD uv run python gke/main.py
+# Set entrypoint
+ENTRYPOINT ["uv", "run", "python", "entrypoint.py"]
