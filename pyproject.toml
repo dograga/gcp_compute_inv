@@ -8,6 +8,7 @@ dependencies = [
     "google-auth>=2.39.0",
     "google-cloud>=0.34.0",
     "google-cloud-container>=2.56.1",
+    "google-cloud-resource-manager>=1.14.2",
     "redis>=6.0.0",
     "structlog>=25.3.0",
 ]
