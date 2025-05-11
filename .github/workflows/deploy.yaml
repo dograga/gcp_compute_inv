@@ -39,6 +39,7 @@ jobs:
           --vpc-connector cloudrun-connector \
           --service-account svc-compute@extended-web-339507.iam.gserviceaccount.com \
           --memory 512Mi \
+          --args vms \
           --cpu 1 \
           --task-timeout 3600 \
         || \
@@ -48,5 +49,6 @@ jobs:
           --vpc-connector cloudrun-connector \
           --service-account svc-compute@extended-web-339507.iam.gserviceaccount.com \
           --memory 512Mi \
+          --args vms
           --cpu 1 \
           --task-timeout 3600
