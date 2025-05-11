@@ -6,8 +6,13 @@ WORKDIR /app
 # Install uv
 RUN pip install --no-cache-dir uv
 
-# Create a non-root user and switch to it
-RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
+# Create a non-root user with a valid home directory
+RUN addgroup --system appgroup && \
+    adduser --system --ingroup appgroup --home /home/appuser appuser
+
+# Set HOME and cache directory for uv
+ENV HOME=/home/appuser
+ENV XDG_CACHE_HOME=/tmp/uv_cache
 
 # Copy dependency files first
 COPY pyproject.toml uv.lock ./
@@ -15,21 +20,13 @@ COPY pyproject.toml uv.lock ./
 # Copy source code
 COPY . .
 
-# Create the /app/creds directory and set correct permissions
-RUN mkdir -p /app/creds && chmod -R 755 /app/creds && chown -R appuser:appgroup /app/creds
-
-# Change ownership of the app directory
-RUN chown -R appuser:appgroup /app
+# Set proper permissions for everything
+RUN mkdir -p /app/creds && \
+    chmod -R 755 /app/creds && \
+    chown -R appuser:appgroup /app
 
 # Switch to non-root user
 USER appuser
-
-# Create a non-root user with home directory
-RUN addgroup --system appgroup && adduser --system --ingroup appgroup --home /home/appuser appuser
-
-# Set HOME and XDG_CACHE_HOME properly
-ENV HOME=/home/appuser
-ENV XDG_CACHE_HOME=/tmp/uv_cache
 
 # Set entrypoint
 ENTRYPOINT ["uv", "run", "python", "entrypoint.py"]
