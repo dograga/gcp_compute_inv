@@ -9,19 +9,19 @@ jobs:
 
     steps:
     - name: Checkout the repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v2
       with:
         credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
-    - name: Set up Google Cloud SDK
-      uses: google-github-actions/setup-gcloud@v0
+    - name: Set up Google Cloud CLI
+      uses: google-github-actions/setup-gcloud@v1
       with:
-        version: '400.0.0'  # Choose your version or latest
+        install_components: 'beta'
 
-    - name: Configure Docker to use the Google Cloud Container Registry
+    - name: Configure Docker to use Artifact Registry
       run: |
         gcloud auth configure-docker us-central1-docker.pkg.dev
 
@@ -30,9 +30,10 @@ jobs:
         docker build -t us-central1-docker.pkg.dev/extended-web-339507/test-repo/gke-inventory:latest .
         docker push us-central1-docker.pkg.dev/extended-web-339507/test-repo/gke-inventory:latest
 
-    - name: Deploy Cloud Run job
+    - name: Deploy or update Cloud Run Job
       run: |
-        gcloud run jobs create vms-job \
+        gcloud run jobs describe vms-job --region us-central1 > /dev/null 2>&1 && \
+        gcloud run jobs update vms-job \
           --image us-central1-docker.pkg.dev/extended-web-339507/test-repo/gke-inventory:latest \
           --region us-central1 \
           --vpc-connector cloudrun-connector \
@@ -40,7 +41,8 @@ jobs:
           --memory 512Mi \
           --cpu 1 \
           --timeout 3600 \
-          || gcloud run jobs update vms-job \
+        || \
+        gcloud run jobs create vms-job \
           --image us-central1-docker.pkg.dev/extended-web-339507/test-repo/gke-inventory:latest \
           --region us-central1 \
           --vpc-connector cloudrun-connector \
