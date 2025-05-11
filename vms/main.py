@@ -60,7 +60,7 @@ def list_all_instances(project_id: str) -> List[VMInfo]:
                         tags = instance.labels
                     info = VMInfo(
                             vm_name=instance.name,
-                            zone=instance.zone,
+                            zone=zone,
                             status=instance.status,
                             cpu_platform=instance.cpu_platform,
                             machine_type=instance.machine_type,
