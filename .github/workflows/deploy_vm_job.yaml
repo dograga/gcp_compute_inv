@@ -1,4 +1,4 @@
-name: Deploy Cloud Run Job
+name: Deploy VM Inventory Cloud Run Job
 
 on:
   workflow_dispatch:  # <-- enables manual trigger from GitHub UI
