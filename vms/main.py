@@ -6,7 +6,7 @@ import structlog
 from typing import List
 
 r = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
-r = redis.Redis(host='10.38.229.3', port=6379, db=0)
+#r = redis.Redis(host='10.38.229.3', port=6379, db=0)
 logger = structlog.get_logger()
 
 @dataclass
@@ -52,7 +52,7 @@ def list_all_instances(project_id: str) -> List[VMInfo]:
         vmlist: List[VMInfo] = []
         agg_list = instance_client.aggregated_list(request=request)
         for zone, response in agg_list:
-            tags = None
+            tags = {}
             if response.instances:
                 for instance in response.instances:
                     logger.info("Instance found", instance=instance.name)
