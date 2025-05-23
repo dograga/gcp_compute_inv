@@ -1,0 +1,54 @@
+name: Deploy VM Inventory Cloud Run Job
+
+on:
+  workflow_dispatch:  # <-- enables manual trigger from GitHub UI
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout the repository
+      uses: actions/checkout@v3
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+    - name: Set up Google Cloud CLI
+      uses: google-github-actions/setup-gcloud@v1
+      with:
+        install_components: 'beta'
+
+    - name: Configure Docker to use Artifact Registry
+      run: |
+        gcloud auth configure-docker us-central1-docker.pkg.dev
+
+    - name: Build and push Docker image
+      run: |
+        docker build -t us-central1-docker.pkg.dev/extended-web-339507/test-repo/gke-inventory:latest .
+        docker push us-central1-docker.pkg.dev/extended-web-339507/test-repo/gke-inventory:latest
+
+    - name: Deploy or update Cloud Run Job
+      run: |
+        gcloud run jobs describe vms-sch-job --region us-central1 > /dev/null 2>&1 && \
+        gcloud run jobs update vms-sch-job \
+          --image us-central1-docker.pkg.dev/extended-web-339507/test-repo/gke-inventory:latest \
+          --region us-central1 \
+          --vpc-connector cloudrun-connector \
+          --service-account svc-compute@extended-web-339507.iam.gserviceaccount.com \
+          --memory 512Mi \
+          --args vm-scheduler \
+          --cpu 1 \
+          --task-timeout 3600 \
+        || \
+        gcloud run jobs create vms-sch-job \
+          --image us-central1-docker.pkg.dev/extended-web-339507/test-repo/gke-inventory:latest \
+          --region us-central1 \
+          --vpc-connector cloudrun-connector \
+          --service-account svc-compute@extended-web-339507.iam.gserviceaccount.com \
+          --memory 512Mi \
+          --args vm-scheduler \
+          --cpu 1 \
+          --task-timeout 3600

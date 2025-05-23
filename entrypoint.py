@@ -6,6 +6,7 @@ def run(module_name):
         "gke": "gke/main.py",
         "vms": "vms/main.py",
         "projects": "projects/main.py",
+        "vm-scheduler": "vm-scheduler/main.py",
     }
     if module_name not in path_map:
         print(f"Unknown module: {module_name}")
