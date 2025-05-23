@@ -53,11 +53,14 @@ def manage_vm(compute, instance, project, zone, should_run):
             "project_id": project
         }
         logger.info(f"payload: {payload}")
-        response = requests.post(vmops_api, json=payload)
-        if response.status_code == 200:
-            logger.info(f"Action '{action}' for VM {instance} pushed successfully.")
-        else:
-            logger.error(f"Failed to push action '{action}' for VM {instance}.", error=response.text)
+        try:
+            response = requests.post(vmops_api, json=payload)
+            if response.status_code == 200:
+                logger.info(f"Action '{action}' for VM {instance} pushed successfully.")
+            else:
+                logger.error(f"Failed to push action '{action}' for VM {instance}.", error=response.text)
+        except requests.RequestException as e:
+            logger.error("Exception occurred while sending request", error=str(e))   
 
 def process_instance(project, zone):
     compute = build('compute', 'v1', credentials=credentials)
