@@ -10,6 +10,7 @@ dependencies = [
     "google-cloud-compute>=1.30.0",
     "google-cloud-container>=2.56.1",
     "google-cloud-resource-manager>=1.14.2",
+    "pytz>=2025.2",
     "redis>=6.0.0",
     "structlog>=25.3.0",
 ]

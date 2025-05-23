@@ -6,7 +6,7 @@ import structlog
 from typing import List
 
 r = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
-r = redis.Redis(host='10.38.229.3', port=6379, db=0)
+#r = redis.Redis(host='10.38.229.3', port=6379, db=0)
 logger = structlog.get_logger()
 
 @dataclass
@@ -56,11 +56,12 @@ def list_all_instances(project_id: str) -> List[VMInfo]:
             if response.instances:
                 for instance in response.instances:
                     logger.info("Instance found", instance=instance.name)
+                    logger.info("Instance dump", zone=instance)
                     if instance.labels:
                         tags = instance.labels
                     info = VMInfo(
                             vm_name=instance.name,
-                            zone=zone,
+                            zone=zone.replace("zones/", ""),
                             status=instance.status,
                             cpu_platform=instance.cpu_platform,
                             machine_type=instance.machine_type,
