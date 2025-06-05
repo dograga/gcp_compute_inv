@@ -4,6 +4,11 @@ from google.cloud import compute_v1
 from dataclasses import dataclass, asdict
 import structlog
 from typing import List
+import requests
+import os 
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from utils.config_loader import load_config
 
 r = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
 #r = redis.Redis(host='10.38.229.3', port=6379, db=0)
@@ -22,20 +27,19 @@ class VMInfo:
 def post_to_redis(vms: VMInfo):
     inventory_key="gcp:vms"
     for vm in vms:
-        print(vm)
-        logger.info("Update VM info to redis", VM=vm)
+        logger.info("Update VM info to redis", VM=vm.vm_name)
         vm_key = f"gcp:vm:{vm.vm_name}"
         project_key = f"gcp:vms:{vm.project_id}"
         vm_key = f"{project_key}:{vm.vm_name}"
         try:
-            logger.info(vm)
+            #logger.info(vm)
             # Add project ID to the master project set
             r.sadd(inventory_key, vm.project_id)
             # Add vm name to the set under project ID
             r.sadd(project_key, vm.vm_name)
             # Store VM info
             r.set(vm_key, json.dumps(asdict(vm)))
-            logger.info("Cluster added to Redis", vm_key=vm_key)
+            logger.info("VM added to Redis", vm_key=vm_key)
         except redis.RedisError as e:
             logger.error("Redis error", error=str(e))
 
@@ -56,7 +60,7 @@ def list_all_instances(project_id: str) -> List[VMInfo]:
             if response.instances:
                 for instance in response.instances:
                     logger.info("Instance found", instance=instance.name)
-                    logger.info("Instance dump", zone=instance)
+                    #logger.info("Instance dump", zone=instance)
                     if instance.labels:
                         tags = instance.labels
                     info = VMInfo(
@@ -73,7 +77,25 @@ def list_all_instances(project_id: str) -> List[VMInfo]:
     except Exception as e:
         logger.error("Error listing instances", error=str(e))
         return None
-        
-vms=list_all_instances("extended-web-339507")
-post_to_redis(vms)
-logger.info("VMs found", vms=vms)
+
+def main():        
+    load_config()
+    api_endpoint = os.getenv("API_ENDPOINT") + "/projects"
+    headers = {
+        "accept": "application/json"
+        }
+    try:
+        response = requests.get(api_endpoint, headers=headers)
+        response.raise_for_status()  # Raise exception for HTTP errors
+        projects = response.json()
+        if projects:
+            for project in projects:
+                logger.info("Processing project", project=project["project_id"])
+                vms=list_all_instances(project["project_id"])
+                post_to_redis(vms)
+                #logger.info("VMs found", vms=vms)
+    except Exception as e:
+        logger.error("Error fetching projects or VMs", error=str(e))
+
+if __name__ == "__main__":
+    main()

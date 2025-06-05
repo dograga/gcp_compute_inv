@@ -13,6 +13,7 @@ RUN addgroup --system appgroup && \
 # Set HOME and cache directory for uv
 ENV HOME=/home/appuser
 ENV XDG_CACHE_HOME=/tmp/uv_cache
+ENV PYTHONPATH="${PYTHONPATH}:/app"
 
 # Copy dependency files first
 COPY pyproject.toml uv.lock ./
