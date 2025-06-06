@@ -10,8 +10,9 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from utils.config_loader import load_config
 
-r = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
-#r = redis.Redis(host='10.38.229.3', port=6379, db=0)
+load_config()
+api_endpoint = os.getenv("API_ENDPOINT") + "/projects"
+r = redis.Redis(host=os.getenv("REDIS_HOST"), port=os.getenv("REDIS_PORT"), db=0, decode_responses=True)
 logger = structlog.get_logger()
 
 @dataclass
@@ -79,8 +80,6 @@ def list_all_instances(project_id: str) -> List[VMInfo]:
         return None
 
 def main():        
-    load_config()
-    api_endpoint = os.getenv("API_ENDPOINT") + "/projects"
     headers = {
         "accept": "application/json"
         }

@@ -5,7 +5,14 @@ import json
 from typing import List, Optional
 import redis
 import structlog
+import os
+import sys
 #import app.log_config as _
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from utils.config_loader import load_config
+load_config()
+r = redis.Redis(host=os.getenv("REDIS_HOST"), port=os.getenv("REDIS_PORT"), db=0, decode_responses=True)
 
 logger = structlog.get_logger()
 
@@ -51,15 +58,12 @@ def fetch_gke_clusters() -> List[GKEClusterInfo]:
 
 
 def main():
-    r = redis.Redis(host='172.22.204.229', port=6379, db=0)
-    r = redis.Redis(host='10.38.229.3', port=6379, db=0)
     clusters = fetch_gke_clusters()
     inventory_key = "gke:clusters"
     if not clusters:
-        print("No GKE clusters found.")
+        logger.info("No GKE clusters found.")
     else:
         for cluster in clusters:
-            print(cluster)
             logger.info("Cluster info", cluster=cluster)
             cluster_key = f"gke:cluster:{cluster.name}"
             try:
