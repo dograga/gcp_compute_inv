@@ -30,7 +30,6 @@ class GKEClusterInfo:
 def fetch_gke_clusters() -> List[GKEClusterInfo]:
     credentials, project_id = default()
     logger.info("Using project_id", project_id=project_id)
-    logger.info("Using credentials", credentials=credentials)
     client = container_v1.ClusterManagerClient(credentials=credentials)
     parent = f"projects/{project_id}/locations/-"  # All regions
     response = client.list_clusters(parent=parent)
