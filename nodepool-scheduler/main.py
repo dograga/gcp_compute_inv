@@ -5,15 +5,17 @@ from datetime import datetime, time
 import pytz
 import structlog
 from google.cloud import container_v1
+import os 
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from utils.config_loader import load_config
 
+load_config()
+API_ENDPOINT = os.getenv("API_ENDPOINT") + "/nodepool-resize"
 logger = structlog.get_logger()
-
-REDIS_HOST = "localhost"
-REDIS_PORT = 6379
+r = redis.Redis(host=os.getenv("REDIS_HOST"), port=os.getenv("REDIS_PORT"), db=0, decode_responses=True)
 REDIS_SCHEDULER_SET = "gke:scheduler"
 REDIS_PREFIX = "gke_nodepool_schedule:"
-
-API_ENDPOINT = "http://127.0.0.1:8080/nodepool-resize"
 
 def get_current_nodepool_config(project_id, zone, cluster_id, nodepool_id):
     try:
@@ -99,5 +101,4 @@ def check_and_resize(redis_client):
             print(f"Response: {response.status_code} - {response.text}")
 
 if __name__ == "__main__":
-    r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=False)
     check_and_resize(r)

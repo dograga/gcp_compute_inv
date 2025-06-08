@@ -3,9 +3,18 @@ import json
 import redis
 from google.cloud import firestore
 import structlog
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from utils.config_loader import load_config
+load_config()
 
 logger = structlog.get_logger()
-r = redis.Redis(host='localhost', port=6379, db=0)
+
+r = redis.Redis(host=os.getenv("REDIS_HOST"), port=os.getenv("REDIS_PORT"), db=0, decode_responses=True)
+REDIS_SCHEDULER_SET = "gke:scheduler"
+REDIS_PREFIX = "gke_nodepool_schedule:"
+
+logger = structlog.get_logger()
 firestore_client = firestore.Client()
 COLLECTION_NAME = "gke-nodepool-scheduler"
 REDIS_KEY_PREFIX = "gke_nodepool_schedule"

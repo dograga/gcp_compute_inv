@@ -4,9 +4,15 @@ from googleapiclient.discovery import build
 from google.auth import default
 import structlog
 import requests
+import os 
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from utils.config_loader import load_config
 
+load_config()
 logger = structlog.get_logger()
-vmops_api = "http://localhost:8080/vm-operation"
+
+vmops_api = os.getenv("API_ENDPOINT") + "/vm-operation"
 credentials, _ = default()
 
 def parse_schedule_label(label_value):
