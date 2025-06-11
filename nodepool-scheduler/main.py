@@ -24,6 +24,7 @@ def get_current_nodepool_config(project_id, zone, cluster_id, nodepool_id):
         nodepool = client.get_node_pool(name=nodepool_path)
 
         autoscaling = nodepool.autoscaling
+        logger.info("Fetched nodepool config", nodepool_id=nodepool_id, autoscaling=autoscaling)
         current_config = {
             "min_nodes": autoscaling.min_node_count if autoscaling else -1,
             "max_nodes": autoscaling.max_node_count if autoscaling else -1,
@@ -56,8 +57,9 @@ def parse_config(config_str):
 
 def check_and_resize(redis_client):
     keys = redis_client.smembers(REDIS_SCHEDULER_SET)
-    for raw_key in keys:
-        key = raw_key.decode("utf-8")
+    for key in keys:
+        #key = raw_key.decode("utf-8")
+        logger.info(f"Processing key: {key}")
         data_json = redis_client.get(key)
         if not data_json:
             continue
@@ -68,16 +70,22 @@ def check_and_resize(redis_client):
         min_n, max_n, desired_n = parse_config(config_str)
 
         # Simulate existing nodepool config (in real use, query actual GKE config here)
-        current_config = {
-            "min_nodes": -1,
-            "max_nodes": -1,
-            "desired_node_count": -1,
-            "enable_autoscaling": not in_business  # just for demo
-        }
+        current_config = get_current_nodepool_config(
+            project_id=data["project_id"],
+            zone=data["zone"],
+            cluster_id=data["cluster_id"],
+            nodepool_id=data["nodepool_id"]
+        )
+        logger.info(f"Current nodepool config: {current_config}")
+        # current_config = {
+        #     "min_nodes": -1,
+        #     "max_nodes": -1,
+        #     "desired_node_count": -1,
+        #     "enable_autoscaling": not in_business  # just for demo
+        # }
 
         # Only trigger if config is different
         logger.info(f"Checking nodepool: {data['nodepool_id']} - Business Hours: {in_business}")
-        logger.info(f"Current config: {current_config}, New config: min={min_n}, max={max_n}, desired={desired_n}")
         if (
             current_config["min_nodes"] != min_n or
             current_config["max_nodes"] != max_n or
@@ -98,7 +106,10 @@ def check_and_resize(redis_client):
 
             logger.info(f"Triggering resize for: {data['nodepool_id']} endpoint: {API_ENDPOINT}", payload=payload)
             response = requests.post(API_ENDPOINT, json=payload)
-            print(f"Response: {response.status_code} - {response.text}")
+            logger.info("Response status", status=response.status_code)
+            #print(f"Response: {response.status_code} - {response.text}")
+        else:
+            logger.info(f"No resize needed for nodepool: {data['nodepool_id']} - Current config matches desired config")
 
 if __name__ == "__main__":
     check_and_resize(r)

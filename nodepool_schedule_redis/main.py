@@ -11,16 +11,13 @@ load_config()
 logger = structlog.get_logger()
 
 r = redis.Redis(host=os.getenv("REDIS_HOST"), port=os.getenv("REDIS_PORT"), db=0, decode_responses=True)
-REDIS_SCHEDULER_SET = "gke:scheduler"
+firestore_db = firestore.Client(database=os.getenv("FIRESTORE_DB"), project=os.getenv("PROJECT_ID"))
 REDIS_PREFIX = "gke_nodepool_schedule:"
-
-logger = structlog.get_logger()
-firestore_client = firestore.Client()
 COLLECTION_NAME = "gke-nodepool-scheduler"
 REDIS_KEY_PREFIX = "gke_nodepool_schedule"
 
 def main():
-    collection_ref = firestore_client.collection(COLLECTION_NAME)
+    collection_ref = firestore_db.collection(COLLECTION_NAME)
     docs = collection_ref.stream()
     try:
         logger.info("Syncing Firestore data to Redis", collection=COLLECTION_NAME)

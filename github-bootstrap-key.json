@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "smooth-command-462303-n7",
+  "private_key_id": "8631388f65101eddda4a5cb3014b9e29dc1a222b",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDMsCUG2brg4j2Q\n7sHSoI1AWMrZ8fRht1piVQi5LMuSXH0Ex+c7lfD1GCdqzuO7xpwWAmqyKjiOVuqk\nCvtWs/ctIYE6aVv62fosZBu+Qjr6j3urWAoBa2RX9hIuKHRK8RAChibIYlHJZ3W/\npPlVRRLZZ/ObFLPf413Vs+3KML0EiOhuGluMGGXEWoSIedy6HGk/RrUF3DWtyIdK\nhBgsySuRQkrW8CS0n30rEtn51niiSBstF0EdS8r4zOVUBDrEb0CdUUL/vCQgYGyE\nAIZKCeUe8f2XoLx4057yzA0k4LgQC68DXcu0H9A1UBCCWHzaEyWUvi6a0IGGkgPu\n3G+t7lNDAgMBAAECggEAE2Dx1c4zT9XbjPyDGSqIyk4dwQ3pMdR8GCcuJj9EHrKR\nm4GZi3NMrB0B+QNmstZrh0yUnBLnO9f6wFZ8fomXSIyNgYw2tcSBV5vlYdk/YDge\nterQjQXagCwUgzjimbMXmEWUfRA3PLbbgli0yl/kbZ+BLsOCVsYIkjzwsbMfkhgr\ndbAzYXJ97Qj7dUy1m67uBNORIro+4Ket6MBUdyPRfEnrCNQ4PYxX21MsbgSNvFGM\n3ULQ+DKz92kmeSRuZpbhlYf8m1BW1zZCB1fW5oUuHk0kNwq+1hPrD6N5kgeLFRxr\nF4BJPQ2BYsfn6GPANm9dxhbzwWeKB76DAkGXAtn54QKBgQDnbzbF/nJLGZpGxmYz\nihe7VuPhUNW8TcBL0aZke4PQZJAaWv9epDPBy/yIENarRQJchUHRbrmoq1E17AaH\n4MnDqPLUpO9Ad5V0fEqADA6/vZfz/OwWRdmJ/S+nMN/1bntoMFkzqu05aHwRJ2yK\nqgHOE8/FCxBlzDRla9hNd4GruwKBgQDiaiZMLm1+q+VvzscZ61ArJ0hB8JL98fwG\nF6Y6DfR9XEBXfA3Grcl/XdymThJE3sYDI9hCh6nBSJ+c7//O4Dzf/L+azlefw95d\nUwdEgFKW3VpDhlbGkUOySRj6ludTgbRbPLjr3+FRVc+DWFmksfgjNZbk4m+C0r3G\n+BzdSpnKGQKBgH0elCcwq8vMOKsAweolQzVGAYcjs5nNEyQqYOG8IQQ+CeYlwiAB\nd/XS+WD6cYRAl8k7Rd0bFoaIsCwNwW4eahY8taOe07YvsH48X+6gFi01K/x9hYl5\nE+XVGrkx5DKFG3S1htQ3GW9K/KAthzHkPXuTHGWz2JagcsdOKa+f51vXAoGAHEDG\nuqbofvAQV11kNvXIMTpbp+7PSOUTX+c/lOr84U/Lr58JUQuKo1whFpeTbAioiOfG\nKrcnFblsQXcpYrVUo1a0yiqJgKQ+cULVG1Uv+SdyBg8TcP/bhLneZhbCkwcSbHgt\nUzHCuhWNKYSy2vxiTHJ5e+JNq/OEPvnjEDIo8rECgYAX46bc842LVWDyOkwObEhk\nF504uduTrdGZNTx2o3DRDt02r7SQ+uu7AHnXyz4hIckaWI6oBKBmR7Skdqbjozpr\nMzxYrXJg68UCA4kZS+zfzA7OV5iocAVwuLbtXvkqUkzHkT/K+MaC3XVsovbso7av\nh0KJYi62yBCmM8+3be/JKA==\n-----END PRIVATE KEY-----\n",
+  "client_email": "github-bootstrap@smooth-command-462303-n7.iam.gserviceaccount.com",
+  "client_id": "116347410779074150086",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/github-bootstrap%40smooth-command-462303-n7.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

@@ -11,7 +11,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from utils.config_loader import load_config
 
 load_config()
-api_endpoint = os.getenv("API_ENDPOINT") + "/projects"
+api_endpoint = os.getenv("API_ENDPOINT") + "projects"
 r = redis.Redis(host=os.getenv("REDIS_HOST"), port=os.getenv("REDIS_PORT"), db=0, decode_responses=True)
 logger = structlog.get_logger()
 
@@ -24,6 +24,18 @@ class VMInfo:
     cpu_platform: str
     project_id: str
     tags: dict = None
+
+def is_gke_node(instance) -> bool:
+    name = instance.name.lower()
+    if name.startswith("gke-") or name.startswith("gk3-"):
+        return True
+
+    if instance.labels:
+        gke_labels = {"goog-gke-node", "goog-gke-nodepool", "goog-k8s-cluster-name"}
+        if any(label in instance.labels for label in gke_labels):
+            return True
+
+    return False
 
 def post_to_redis(vms: VMInfo):
     inventory_key="gcp:vms"
@@ -61,6 +73,9 @@ def list_all_instances(project_id: str) -> List[VMInfo]:
             if response.instances:
                 for instance in response.instances:
                     logger.info("Instance found", instance=instance.name)
+                    if is_gke_node(instance):
+                        logger.info("Skipping GKE node", instance=instance.name)
+                        continue  # Skip GKE nodepool VM
                     #logger.info("Instance dump", zone=instance)
                     if instance.labels:
                         tags = instance.labels
