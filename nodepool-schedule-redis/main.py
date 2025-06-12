@@ -1,0 +1,39 @@
+import os
+import json
+import redis
+from google.cloud import firestore
+import structlog
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from utils.config_loader import load_config
+load_config()
+
+logger = structlog.get_logger()
+
+r = redis.Redis(host=os.getenv("REDIS_HOST"), port=os.getenv("REDIS_PORT"), db=0, decode_responses=True)
+firestore_db = firestore.Client(database=os.getenv("FIRESTORE_DB"), project=os.getenv("PROJECT_ID"))
+COLLECTION_NAME = os.getenv("FS_NODEPOOL_SCHEDULE_COLLECTION")
+REDIS_KEY_PREFIX = "gke_nodepool_schedule"
+REDIS_SET = "gke:scheduler"
+
+def main():
+    collection_ref = firestore_db.collection(COLLECTION_NAME)
+    docs = collection_ref.stream()
+    try:
+        logger.info("Syncing Firestore Nodepool data to Redis", collection=COLLECTION_NAME)
+        for doc in docs:
+            doc_id = doc.id
+            data = doc.to_dict()
+            redis_key = f"{REDIS_KEY_PREFIX}:{doc_id}"
+            # Store each nodepool document individually in Redis
+            logger.info("Storing data in Redis", redis_key=redis_key, data=data)
+            r.set(redis_key, json.dumps(data))
+            # Add the key reference to a Redis Set for index
+            r.sadd(REDIS_SET, redis_key)
+        logger.info("Firestore data synced to Redis", collection=COLLECTION_NAME)
+    except Exception as e:
+        logger.error("Error syncing Firestore to Redis", error=str(e))
+        raise Exception(f"Failed to sync Firestore to Redis: {e}")
+
+if __name__ == "__main__":
+    main()

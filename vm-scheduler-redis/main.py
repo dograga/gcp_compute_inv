@@ -12,24 +12,25 @@ logger = structlog.get_logger()
 
 r = redis.Redis(host=os.getenv("REDIS_HOST"), port=os.getenv("REDIS_PORT"), db=0, decode_responses=True)
 firestore_db = firestore.Client(database=os.getenv("FIRESTORE_DB"), project=os.getenv("PROJECT_ID"))
-REDIS_PREFIX = "gke_nodepool_schedule:"
-COLLECTION_NAME = "gke-nodepool-scheduler"
-REDIS_KEY_PREFIX = "gke_nodepool_schedule"
+COLLECTION_NAME = os.getenv("FS_VM_SCHEDULE_COLLECTION")
+print(COLLECTION_NAME)
+REDIS_KEY_PREFIX = "vm_schedule"
+REDIS_SET = "vm:scheduler"
 
 def main():
     collection_ref = firestore_db.collection(COLLECTION_NAME)
     docs = collection_ref.stream()
     try:
-        logger.info("Syncing Firestore data to Redis", collection=COLLECTION_NAME)
+        logger.info("Syncing Firestore VMs data to Redis", collection=COLLECTION_NAME)
         for doc in docs:
             doc_id = doc.id
             data = doc.to_dict()
-            redis_key = f"gke_nodepool_schedule:{doc_id}"
+            redis_key = f"{REDIS_KEY_PREFIX}:{doc_id}"
             # Store each nodepool document individually in Redis
             logger.info("Storing data in Redis", redis_key=redis_key, data=data)
-            r.set(redis_key, json.dumps(data))
+            r.set(redis_key, json.dumps(data), ex=os.getenv("REDIS_EXPIRE_VM"))  # Set expiration if needed
             # Add the key reference to a Redis Set for index
-            r.sadd("gke:scheduler", redis_key)
+            r.sadd(REDIS_SET, redis_key)
         logger.info("Firestore data synced to Redis", collection=COLLECTION_NAME)
     except Exception as e:
         logger.error("Error syncing Firestore to Redis", error=str(e))
