@@ -13,7 +13,7 @@ logger = structlog.get_logger()
 r = redis.Redis(host=os.getenv("REDIS_HOST"), port=os.getenv("REDIS_PORT"), db=0, decode_responses=True)
 firestore_db = firestore.Client(database=os.getenv("FIRESTORE_DB"), project=os.getenv("PROJECT_ID"))
 COLLECTION_NAME = os.getenv("FS_NODEPOOL_SCHEDULE_COLLECTION")
-REDIS_KEY_PREFIX = "gke_nodepool_schedule"
+REDIS_KEY_PREFIX = "nodepool_schedule"
 REDIS_SET = "gke:scheduler"
 
 def main():
@@ -27,7 +27,7 @@ def main():
             redis_key = f"{REDIS_KEY_PREFIX}:{doc_id}"
             # Store each nodepool document individually in Redis
             logger.info("Storing data in Redis", redis_key=redis_key, data=data)
-            r.set(redis_key, json.dumps(data))
+            r.set(redis_key, json.dumps(data), ex=os.getenv("REDIS_EXPIRE_NODEPOOL"))  # Set expiration if needed
             # Add the key reference to a Redis Set for index
             r.sadd(REDIS_SET, redis_key)
         logger.info("Firestore data synced to Redis", collection=COLLECTION_NAME)

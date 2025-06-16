@@ -23,7 +23,7 @@ class VMInfo:
     zone: str
     cpu_platform: str
     project_id: str
-    tags: dict = None
+    #tags: dict = None
 
 def is_gke_node(instance) -> bool:
     name = instance.name.lower()
@@ -51,7 +51,7 @@ def post_to_redis(vms: VMInfo):
             # Add vm name to the set under project ID
             r.sadd(project_key, vm.vm_name)
             # Store VM info
-            r.set(vm_key, json.dumps(asdict(vm)))
+            r.set(vm_key, json.dumps(asdict(vm)),ex=os.getenv("REDIS_EXPIRE_VM"))  # Set expiration if needed
             logger.info("VM added to Redis", vm_key=vm_key)
         except redis.RedisError as e:
             logger.error("Redis error", error=str(e))
@@ -69,7 +69,7 @@ def list_all_instances(project_id: str) -> List[VMInfo]:
         vmlist: List[VMInfo] = []
         agg_list = instance_client.aggregated_list(request=request)
         for zone, response in agg_list:
-            tags = {}
+            #tags = {}
             if response.instances:
                 for instance in response.instances:
                     logger.info("Instance found", instance=instance.name)
@@ -77,15 +77,15 @@ def list_all_instances(project_id: str) -> List[VMInfo]:
                         logger.info("Skipping GKE node", instance=instance.name)
                         continue  # Skip GKE nodepool VM
                     #logger.info("Instance dump", zone=instance)
-                    if instance.labels:
-                        tags = instance.labels
+                    #if instance.labels:
+                    #    tags = instance.labels
                     info = VMInfo(
                             vm_name=instance.name,
                             zone=zone.replace("zones/", ""),
                             status=instance.status,
                             cpu_platform=instance.cpu_platform,
                             machine_type=instance.machine_type,
-                            tags=dict(tags),
+                            #tags=dict(tags),
                             project_id=project_id
                         )
                     vmlist.append(info)    

@@ -29,28 +29,36 @@ class GKEClusterInfo:
     project_id: str
     autopilot: Optional[bool] = None
     node_version: Optional[str] = None
+    maint_policy: str = None
 
   
 def store_nodepools(cluster_name: str, location: str, project_id: str):
     try:
         parent = f"projects/{project_id}/locations/{location}/clusters/{cluster_name}"
         response = client.list_node_pools(parent=parent, timeout=custom_timeout)
+
         for nodepool in response.node_pools:
-            key = f"gcp_nodepool:{cluster_name}:{nodepool.name}"
+            # Unique Redis key for nodepool data
+            nodepool_key = f"nodepool:{project_id}:{location}:{cluster_name}:{nodepool.name}"
+            
             data = {
                 "min_node_count": nodepool.autoscaling.min_node_count if nodepool.autoscaling else 0,
                 "max_node_count": nodepool.autoscaling.max_node_count if nodepool.autoscaling else 0,
-                "desired_node_count": nodepool.initial_node_count,  # You may also use current_node_count if needed
+                "desired_node_count": nodepool.initial_node_count,
                 "autoscaling": nodepool.autoscaling.enabled if nodepool.autoscaling else False
             }
 
-            nodepool_key = f"nodepool:{cluster_name}:{nodepool.name}"
+            # Store nodepool details
             r.set(nodepool_key, json.dumps(data))
-            r.sadd(f"gke:nodepools:{cluster_name}", nodepool.name)
-            logger.info("Stored nodepool", nodepool_key=key, data=data)
+
+            # Store nodepool name in a set under a cluster-specific key
+            redis_set_key = f"gke:nodepools:{project_id}:{location}:{cluster_name}"
+            r.sadd(redis_set_key, nodepool.name)
+
+            logger.info("Stored nodepool", nodepool_key=nodepool_key, data=data)
+
     except Exception as e:
         logger.error("Failed to store nodepools", cluster=cluster_name, error=str(e))
-
 
 def fetch_gke_clusters() -> List[GKEClusterInfo]:
     logger.info("Using project_id", project_id=project_id)
@@ -66,6 +74,7 @@ def fetch_gke_clusters() -> List[GKEClusterInfo]:
     cluster_list: List[GKEClusterInfo] = []
 
     for cluster in clusters:
+            #print(cluster)
             info = GKEClusterInfo(
                 name=cluster.name,
                 location=cluster.location,
@@ -74,7 +83,8 @@ def fetch_gke_clusters() -> List[GKEClusterInfo]:
                 master_version=cluster.current_master_version,
                 endpoint=cluster.endpoint,
                 project_id=project_id,
-                autopilot=cluster.autopilot.enabled if cluster.autopilot else False
+                autopilot=cluster.autopilot.enabled if cluster.autopilot else False,
+                maint_policy=str(cluster.maintenance_policy if cluster.maintenance_policy else None)
             )
             cluster_list.append(info)
     return cluster_list
